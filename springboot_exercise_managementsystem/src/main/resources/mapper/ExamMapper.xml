@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.management.mapper.ExamMapper">
+
+    <resultMap id="BaseResultMap" type="com.management.domain.Exam">
+            <id property="eid" column="eid" jdbcType="INTEGER"/>
+            <result property="name" column="name" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--根据条件分页查询考试场次-->
+    <select id="selectByPageAndCondition" resultType="com.management.domain.Exam">
+        select *
+        from exam
+        <where>
+            <if test="examCondition.eid != null and examCondition.eid != ''">
+                and eid like concat("%",#{examCondition.eid},"%")
+            </if>
+            <if test="examCondition.name != null and examCondition.name != ''">
+                and name like concat("%",#{examCondition.name},"%")
+            </if>
+        </where>
+        order by eid
+        limit #{start},#{size};
+
+    </select>
+
+    <!--根据条件查询条目总数-->
+    <select id="getTotalCountByCondition" resultType="java.lang.Integer">
+        select count(*)
+        from exam
+        <where>
+            <if test="examCondition.eid != null and examCondition.eid != ''">
+                and eid like concat("%",#{examCondition.eid},"%")
+            </if>
+            <if test="examCondition.name != null and examCondition.name != ''">
+                and name like concat("%",#{examCondition.name},"%")
+            </if>
+        </where>
+    </select>
+
+    <!--根据id批量删除-->
+    <delete id="deleteByIds">
+        delete from exam
+        where eid in
+        <foreach collection="eids" item="eid" separator="," open="(" close=")">
+            #{eid}
+        </foreach>
+    </delete>
+
+
+</mapper>

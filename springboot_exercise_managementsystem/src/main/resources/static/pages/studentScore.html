@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>考试成绩管理</title>
+    <style>
+        .el-table .warning-row {
+            background: oldlace;
+        }
+
+        .el-table .success-row {
+            background: #f0f9eb;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+
+    <!--搜索表单-->
+    <el-form :inline="true" :model="queryData" class="demo-form-inline">
+
+        <el-form-item label="姓名" prop="name">
+            <el-input v-model="queryData.name" placeholder="姓名" clearable></el-input>
+        </el-form-item>
+
+        <el-form-item label="班级" prop="className">
+            <el-select v-model="queryData.className" placeholder="班级" clearable filterable>
+                <el-option v-for="classroom in classrooms" :value="classroom.name"
+                           :label="classroom.name"></el-option>
+            </el-select>
+        </el-form-item>
+
+        <el-form-item label="科目" prop="subject">
+            <el-select v-model="queryData.subject" placeholder="科目" clearable filterable>
+                <el-option v-for="subject in subjects" :value="subject.name"
+                           :label="subject.name"></el-option>
+            </el-select>
+        </el-form-item>
+
+        <el-form-item label="场次" prop="exam">
+            <el-select v-model="queryData.exam" placeholder="场次" clearable filterable>
+                <el-option v-for="exam in exams" :value="exam.name"
+                           :label="exam.name"></el-option>
+            </el-select>
+        </el-form-item>
+
+        <el-form-item>
+            <el-button type="primary" @click="queryOnSubmit">查询</el-button>
+        </el-form-item>
+    </el-form>
+
+    <!--按钮-->
+    <el-row>
+        <el-button type="danger" plain @click="deleteByIds">批量删除</el-button>
+        <el-button type="primary" plain @click="addStudent">新增</el-button>
+    </el-row>
+
+    <div class="add-form">
+        <!--添加数据对话框表单-->
+        <el-dialog
+                title="添加成绩"
+                :visible.sync="dialogVisible"
+                width="30%"
+                @close="$refs['addForm'].resetFields()">
+            <el-form :model="updateData" label-width="80px" :rules="rule" ref="addForm">
+                <el-form-item label="姓名" prop="name">
+                    <el-select v-model="name" placeholder="姓名" clearable filterable @change="selectNameSelectConfig">
+                        <el-option v-for="student in students" :value="student.name"
+                                   :label="student.name"></el-option>
+                    </el-select>
+                </el-form-item>
+
+                <el-form-item label="学号" prop="sid">
+                    <el-select v-model="updateData.sid" placeholder="学号" clearable filterable>
+                        <el-option v-for="studentSelected in studentsSelected" :value="studentSelected.sid"
+                                   :label="studentSelected.sid"></el-option>
+                    </el-select>
+                </el-form-item>
+
+                <el-form-item label="科目" prop="subid">
+                    <el-select v-model="updateData.subid" placeholder="科目" clearable filterable>
+                        <el-option v-for="subject in subjects" :value="subject.subid" :key="subject.subid"
+                                   :label="subject.name"></el-option>
+                    </el-select>
+                </el-form-item>
+
+                <el-form-item label="场次" prop="eid">
+                    <el-select v-model="updateData.eid" placeholder="场次" clearable filterable>
+                        <el-option v-for="exam in exams" :value="exam.eid" :key="exam.eid"
+                                   :label="exam.name"></el-option>
+                    </el-select>
+                </el-form-item>
+
+                <el-form-item label="分数" prop="score">
+                    <el-input v-model="updateData.score"></el-input>
+                </el-form-item>
+
+                <el-form-item>
+                    <el-button type="primary" @click="addStudentSubmit(addForm)">提交</el-button>
+                    <el-button @click="dialogVisible=false">取消</el-button>
+                </el-form-item>
+            </el-form>
+        </el-dialog>
+    </div>
+
+    <!--修改数据对话框表单-->
+    <el-dialog
+            title="编辑信息"
+            :visible.sync="dialogEditVisible"
+            width="30%"
+            @close="$refs['editForm'].resetFields()">
+        <el-form ref="editForm" :model="updateData" label-width="80px" :rules="rule">
+            <el-form-item label="学号" prop="sid">
+                <el-input v-model="updateData.sid" readonly="true" :readonly="true"></el-input>
+            </el-form-item>
+
+            <el-form-item label="姓名" prop="name">
+                <el-input v-model="name" :readonly="true"></el-input>
+            </el-form-item>
+
+            <el-form-item label="科目" prop="subid">
+                <el-select v-model="updateData.subid" placeholder="科目" clearable filterable>
+                    <el-option v-for="subject in subjects" :value="String(subject.subid)" :key="subject.subid"
+                               :label="subject.name"></el-option>
+                </el-select>
+            </el-form-item>
+
+            <el-form-item label="场次" prop="eid">
+                <el-select v-model="updateData.eid" placeholder="场次" clearable filterable>
+                    <el-option v-for="exam in exams" :value="String(exam.eid)" :key="exam.eid"
+                               :label="exam.name"></el-option>
+                </el-select>
+            </el-form-item>
+
+            <el-form-item label="分数" prop="score">
+                <el-input v-model="updateData.score"></el-input>
+            </el-form-item>
+
+            <el-form-item>
+                <el-button type="primary" @click="updateStudentSubmit(editForm)">提交</el-button>
+                <el-button @click="dialogEditVisible=false">取消</el-button>
+            </el-form-item>
+        </el-form>
+    </el-dialog>
+
+    <!--表格-->
+    <template>
+        <el-table
+                :data="tableData"
+                style="width: 100%"
+                :row-class-name="tableRowClassName"
+                @selection-change="handleSelectionChange">
+            <el-table-column
+                    type="selection"
+                    width="55">
+            </el-table-column>
+            <el-table-column
+                    type="index"
+                    width="50">
+            </el-table-column>
+            <el-table-column
+                    prop="sid"
+                    label="学号"
+                    sortable
+                    align="center">
+            </el-table-column>
+            <el-table-column
+                    prop="name"
+                    label="姓名"
+                    sortable
+                    align="center">
+            </el-table-column>
+            <el-table-column
+                    prop="className"
+                    label="班级"
+                    sortable
+                    align="center">
+            </el-table-column>
+            <el-table-column
+                    prop="subject"
+                    label="考试科目"
+                    sortable
+                    align="center">
+            </el-table-column>
+            <el-table-column
+                    prop="exam"
+                    label="考试场次"
+                    sortable
+                    align="center">
+            </el-table-column>
+            <el-table-column
+                    prop="score"
+                    label="分数"
+                    sortable
+                    align="center">
+            </el-table-column>
+            <el-table-column
+                    align="center"
+                    label="操作">
+                <template slot-scope="scope">
+                    <el-row>
+                        <el-button size="mini" type="primary" @click="updateStudent(scope.row)">修改</el-button>
+                        <el-button size="mini" type="danger" @click="deleteById(scope.row)">删除</el-button>
+                    </el-row>
+                </template>
+
+            </el-table-column>
+
+        </el-table>
+    </template>
+
+    <!--分页工具条-->
+    <el-pagination
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="currentPage"
+            :page-sizes="[5, 10, 15, 20]"
+            :page-size="pageSize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="totalCount">
+    </el-pagination>
+
+</div>
+
+</body>
+
+<script src=..\js\vue.js></script>
+<script src="..\element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="..\element-ui/lib/theme-chalk/index.css">
+<script src="..\js\axios-0.18.0.js"></script>
+
+<script>
+    new Vue({
+        el: "#app",
+
+        created() {
+            this.selectByPage();
+            this.getEchoData();
+        },
+
+
+        data: {
+            // 当前页码
+            currentPage: 1,
+            //当前页数据
+            pageSize: 5,
+            //查询总数居
+            totalCount: 100,
+            // 添加数据对话框是否展示的标记
+            dialogVisible: false,
+            //边际对话框是否展示的标记
+            dialogEditVisible: false,
+            // 复选框选中数据集合
+            multipleSelection: [],
+            //被选中的id集合
+            selectedIds: [],
+            // 表格数据
+            tableData: [],
+            //修改表单数据
+            updateData: {
+                sid: '',
+                subid: '',
+                eid: '',
+                score: ''
+            },
+            name: '',
+            //下拉选择框班级回显数据
+            classrooms: [],
+            //下拉选择框科目回显数据
+            subjects: [],
+            //下拉选择框考试场次回显数据
+            exams: [],
+            //下拉选择框学生回显数据
+            students: [],
+            studentsSelected: [],
+            //搜索表单数据
+            queryData: {
+                name: '',
+                className: '',
+                subject: '',
+                exam: ''
+            },
+            //表单验证规则/^\d+$|^\d+[.]?\d+$/
+            rule: {
+                sid: [
+                    {required: true, message: '请选择学号', trigger: 'blur'},
+                ],
+                eid: [
+                    {required: true, message: '请选择场次', trigger: 'blur'}
+                ],
+                subid: [
+                    {required: true, message: '请选择科目', trigger: 'blur'}
+                ],
+                score: [
+                    {required: true, message: '请输入分数', trigger: 'blur'},
+                    {
+                        required: true,
+                        pattern: /^\d+$|^\d+[.]?\d+$/,
+                        message: '分数仅支持数字',
+                        trigger: 'blur'
+                    },
+                    {
+                        required: true,
+                        pattern: /(^[1][0-4][0-9]$)|(^150$)|(^[1-9][0-9]$)|(^100$)|(^[0-9]$)$/,
+                        message: '分数输入错误',
+                        trigger: 'blur'
+                    }
+
+                ],
+            }
+
+        },
+
+        methods: {
+            //分页查询
+            selectByPage() {
+                axios.post("/scores/get?currentPage=" + this.currentPage + "&pageSize=" + this.pageSize, this.queryData).then((resp) => {
+                    this.tableData = resp.data.data.rows;
+                    this.totalCount = resp.data.data.totalCount;
+                })
+            },
+
+            //条件查询
+            queryOnSubmit() {
+                axios.post("/scores/get?currentPage=" + this.currentPage + "&pageSize=" + this.pageSize, this.queryData).then((resp) => {
+                    this.tableData = resp.data.data.rows;
+                    this.totalCount = resp.data.data.totalCount;
+                })
+            },
+
+            //批量删除
+            deleteByIds() {
+                this.$confirm("此操作永久删除当前数据，是否继续？", "提示", {
+                    type: 'info'
+                }).then(() => {
+                    //取出被选中集合中数据的对应id
+                    for (let i = 0; i < this.multipleSelection.length; i++) {
+                        let selectionElement = this.multipleSelection[i];
+                        this.selectedIds[i] = selectionElement.id;
+                    }
+
+                    axios.post("/scores/delete", this.selectedIds).then((res) => {
+                        if (res.data.code == 20021) {
+                            this.$message.success("删除成功");
+                        } else {
+                            this.$message.error("删除失败");
+                        }
+                    }).finally(() => {
+                        this.selectByPage();
+                    });
+                }).catch(() => {
+                    this.$message.info("取消删除");
+                });
+            },
+
+            //根据id删除
+            deleteById(row) {
+                this.$confirm("此操作将永久删除数据，是否继续？", "提示", {
+                    type: 'info'
+                }).then(() => {
+                    axios.get("/scores/delete/" + row.id).then((res) => {
+                        if (res.data.code == 20021) {
+                            this.$message.success("删除成功");
+                        } else {
+                            this.$message.error("删除失败");
+                        }
+                    }).finally(() => {
+                        this.selectByPage();
+                    });
+                }).catch(() => {
+                    this.$message.info("取消删除");
+                });
+            },
+
+            //获取下拉选择框回显数据
+            getEchoData() {
+                axios.get("/classrooms/getAll").then((resp) => {
+                    this.classrooms = resp.data.data;
+                });
+
+                axios.get("/exams/getAll").then((resp) => {
+                    this.exams = resp.data.data;
+                });
+
+                axios.get("/subjects/getAll").then((resp) => {
+                    this.subjects = resp.data.data;
+                });
+
+                axios.get("/students/getAll").then((resp) => {
+                    this.students = resp.data.data;
+                });
+            },
+
+
+            //弹出添加窗口
+            addStudent() {
+                // 重置表单
+                this.updateData = {};
+                this.name = '';
+                this.studentsSelected = [];
+                this.dialogVisible = true;
+            },
+
+            //学号，姓名下拉框二级联动
+            selectNameSelectConfig() {
+                this.studentsSelected = [];
+                this.updateData.sid = '';
+                let name = this.name;
+                let j = 0;
+                for (let i = 0; i < this.students.length; i++) {
+                    let selectedElement = this.students[i];
+                    if (selectedElement.name == name) {
+                        this.studentsSelected[j] = selectedElement;
+                        j++;
+                    }
+                }
+            },
+
+            //添加成绩提交
+            addStudentSubmit(addForm) {
+                this.$refs.addForm.validate((valid) => {
+                    if (valid) {
+                        axios.post("/scores/insert", this.updateData).then((res) => {
+                            if (res.data.code == 20011) {
+                                this.dialogVisible = false;
+                                this.$message.success("添加成功");
+                            } else {
+                                this.$message.error(res.data.msg);
+                            }
+                        }).finally(() => {
+                            this.selectByPage();
+                        });
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+
+            //点击修改按钮后回显表单数据
+            updateStudent(row) {
+                this.name = row.name;
+                axios.get("/scores/get/" + row.id).then((res) => {
+                    this.updateData = res.data.data;
+                    this.dialogEditVisible = true;
+                });
+            },
+
+            //修改成绩提交
+            updateStudentSubmit(editForm) {
+                this.$refs.editForm.validate((valid) => {
+                    if (valid) {
+                        axios.post("/scores/update", this.updateData).then((res) => {
+                            if (res.data.code == 20031) {
+                                this.dialogEditVisible = false;
+                                this.$message.success("修改成功");
+                            } else {
+                                this.$message.error("修改失败");
+                            }
+                        }).finally(() => {
+                            this.updateData={};
+                            this.selectByPage();
+                        });
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+
+            tableRowClassName({row, rowIndex}) {
+                if ((rowIndex + 3) % 4 === 0) {
+                    return 'warning-row';
+                } else if ((rowIndex + 1) % 4 === 0) {
+                    return 'success-row';
+                }
+                return '';
+            },
+
+            // 复选框选中后执行的方法
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+
+            //分页
+            handleSizeChange(val) {
+                this.pageSize = val;
+                this.selectByPage();
+            },
+
+            handleCurrentChange(val) {
+                this.currentPage = val;
+                this.selectByPage();
+            }
+
+
+        }
+    })
+</script>
+
+</html>

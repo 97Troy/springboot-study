@@ -1,0 +1,93 @@
+
+body{
+    margin: 0 auto;
+}
+p{
+    margin: auto;
+}
+li{
+    list-style-type:none;
+}
+ul{
+    padding: 0;
+}
+a:link {text-decoration:none;color: white;}
+a:visited {text-decoration:none;color: white;}
+a:hover {text-decoration:none;color: white;}
+a:active {text-decoration:none;color: white;}
+/*顶部黑条*/
+.head{
+    height: 50px;
+    background-color: #28bef8;
+    color: white;
+}
+
+.big-content .menu{
+    position: fixed;
+    top: 50px;
+    left: 0;
+    bottom: 0;
+    width: 160px;
+    background-color: #28bef8;
+}
+.big-content .content{
+    position: fixed;
+    top: 50px;
+    right: 0;
+    bottom: 0;
+    left: 160px;
+    background-color: #F8F9FA;
+    overflow: hidden;
+}
+
+.head .logo img{
+    width: 200px;
+    height: 45px;
+    float: left;
+    margin-top: 3px;
+    margin-left: 40px;
+}
+
+.head .zi {
+    font-size: 30px;
+    text-align: center;
+}
+.head .zi p{
+    padding: 5px;
+}
+
+/*左侧菜单栏*/
+.big-content .menu ul{
+    font-size: 25px;
+    margin: 0;
+    background-color: #0ae8fc;
+    text-align: center;
+    color: #000000;
+}
+.big-content .menu p{
+    padding: 10px 0;
+
+}
+.big-content .menu li{
+    font-size: 16px;
+    line-height: 30px;
+    text-align: center;
+    background-color: #28bef8;
+    color: white;
+}
+.big-content .menu a{
+    display: block;
+}
+.big-content .menu li:hover{
+    background-color: #2F4056;
+}
+
+.big-content .content{
+    position: absolute;
+    border: 0 solid #DEE2E6;
+}
+.content-1{
+    width: 100%;
+    height: 100%;
+}
+

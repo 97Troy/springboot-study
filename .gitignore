@@ -1,0 +1,14 @@
+# Project exclude paths
+/mybatisplus_01_quickstart/target/
+/mybatisplus_02_dql/target/
+/mybatisplus_03_dml/target/
+/mybatisplus_04_generator/target/
+/springboot_01_quickstart/target/
+/springboot_02_base_config/target/
+/springboot_03_profile/target/
+/springboot_05_maven_and_boot_profile/target/
+/springboot_06_config_file/target/
+/springboot_07_test/target/
+/springboot_08_mybatis/target/
+/springboot_09_ssm/target/
+/springboot_exercise_managementsystem/target/

@@ -1,0 +1,16 @@
+package com.management;
+
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+
+@SpringBootApplication
+@MapperScan("com.management.mapper")
+public class SpringbootExerciseManagementsystemApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(SpringbootExerciseManagementsystemApplication.class, args);
+    }
+
+}

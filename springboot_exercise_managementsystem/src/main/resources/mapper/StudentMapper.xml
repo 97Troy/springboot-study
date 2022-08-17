@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.management.mapper.StudentMapper">
+
+    <resultMap id="BaseResultMap" type="com.management.domain.Student">
+        <id property="sid" column="sid" jdbcType="INTEGER"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="sex" column="sex" jdbcType="CHAR"/>
+        <result property="classCode" column="class_code" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--分页查询学生信息-->
+    <select id="selectByPageAndCondition" resultType="com.management.Vo.StudentVo">
+        select student.sid ,student.sex, student.name ,classroom.name as className
+        from student_management.student,classroom
+        <where>
+            student.class_code = classroom.cid
+            <if test="studentCondition.sid != null and studentCondition.sid != ''">
+                and student.sid like concat("%",#{studentCondition.sid},"%")
+            </if>
+            <if test="studentCondition.name != null and studentCondition.name != ''">
+                and student.name like concat("%",#{studentCondition.name},"%")
+            </if>
+            <if test="studentCondition.sex != null and studentCondition.sex != ''">
+                and student.sex like concat("%",#{studentCondition.sex},"%")
+            </if>
+            <if test="studentCondition.className != null and studentCondition.className != ''">
+                and classroom.name like concat("%",#{studentCondition.className},"%")
+            </if>
+        </where>
+        order by student.sid
+        limit #{start},#{size};
+    </select>
+
+    <!--根据条件查询获取条目总数-->
+    <select id="getTotalCountByCondition" resultType="java.lang.Integer">
+        select count(*)
+        from student_management.student,classroom
+        <where>
+            student.class_code = classroom.cid
+            <if test="studentCondition.sid != null and studentCondition.sid != ''">
+                and student.sid like concat("%",#{studentCondition.sid},"%")
+            </if>
+            <if test="studentCondition.name != null and studentCondition.name != ''">
+                and student.name like concat("%",#{studentCondition.name},"%")
+            </if>
+            <if test="studentCondition.sex != null and studentCondition.sex != ''">
+                and student.sex like concat("%",#{studentCondition.sex},"%")
+            </if>
+            <if test="studentCondition.className != null and studentCondition.className != ''">
+                and student.class_code like concat("%",#{studentCondition.className},"%")
+            </if>
+        </where>
+    </select>
+
+    <!--批量删除学生信息-->
+    <delete id="deleteByIds">
+        delete from student_management.student
+        where sid in
+        <foreach collection="sids" item="sid" separator="," open="(" close=")">
+            #{sid}
+        </foreach>
+    </delete>
+
+
+</mapper>

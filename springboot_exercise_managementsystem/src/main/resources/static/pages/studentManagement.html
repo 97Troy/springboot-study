@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>学生信息管理</title>
+    <style>
+        .el-table .warning-row {
+            background: oldlace;
+        }
+
+        .el-table .success-row {
+            background: #f0f9eb;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+
+    <!--搜索表单-->
+    <el-form :inline="true" :model="queryData" class="demo-form-inline">
+
+
+        <el-form-item label="学号" prop="sid">
+            <el-input v-model="queryData.sid" placeholder="学号" clearable></el-input>
+        </el-form-item>
+
+        <el-form-item label="姓名" prop="name">
+            <el-input v-model="queryData.name" placeholder="姓名" clearable></el-input>
+        </el-form-item>
+
+        <el-form-item label="性别" prop="sex">
+            <el-select v-model="queryData.sex" placeholder="性别" clearable>
+                <el-option label="男" value="男"></el-option>
+                <el-option label="女" value="女"></el-option>
+            </el-select>
+        </el-form-item>
+
+        <el-form-item label="班级" prop="className">
+            <el-input v-model="queryData.className" placeholder="班级" clearable></el-input>
+        </el-form-item>
+
+        <el-form-item>
+            <el-button type="primary" @click="queryOnSubmit" size="small">查询</el-button>
+        </el-form-item>
+    </el-form>
+
+    <!--按钮-->
+    <el-row>
+        <el-button type="danger" plain @click="deleteByIds">批量删除</el-button>
+        <el-button type="primary" plain @click="addStudent">新增</el-button>
+    </el-row>
+
+    <div class="add-form">
+        <!--添加数据对话框表单-->
+        <el-dialog
+                title="添加学生"
+                :visible.sync="dialogVisible"
+                width="30%"
+                @close="$refs['addForm'].resetFields()">
+            <el-form :model="updateData" label-width="80px" :rules="rule" ref="addForm" :visible.sync="dialogVisible">
+                <el-form-item label="学号" prop="sid">
+                    <el-input v-model="updateData.sid"></el-input>
+                </el-form-item>
+
+                <el-form-item label="姓名" prop="name">
+                    <el-input v-model="updateData.name"></el-input>
+                </el-form-item>
+
+                <el-form-item label="性别" prop="sex">
+                    <el-select v-model="updateData.sex" placeholder="性别">
+                        <el-option label="男" value="男"></el-option>
+                        <el-option label="女" value="女"></el-option>
+                    </el-select>
+                </el-form-item>
+
+                <el-form-item label="班级" prop="classCode">
+                    <el-select v-model="updateData.classCode" placeholder="班级">
+                        <el-option v-for="classroom in classrooms" :value="classroom.cid" :key="classroom.cid"
+                                   :label="classroom.name"></el-option>
+                    </el-select>
+                </el-form-item>
+
+                <el-form-item>
+                    <el-button type="primary" @click="addStudentSubmit(addForm)">提交</el-button>
+                    <el-button @click="dialogVisible=false">取消</el-button>
+                </el-form-item>
+            </el-form>
+        </el-dialog>
+    </div>
+
+    <!--修改数据对话框表单-->
+    <el-dialog
+            title="编辑信息"
+            :visible.sync="dialogEditVisible"
+            width="30%"
+            @close="$refs['editForm'].resetFields()">
+        <el-form ref="editForm" :model="updateData" label-width="80px" :rules="rule">
+            <el-form-item label="学号" prop="updateData.sid">
+                <el-input v-model="updateData.sid" :readonly="true"></el-input>
+            </el-form-item>
+
+            <el-form-item label="姓名" prop="updateData.name">
+                <el-input v-model="updateData.name"></el-input>
+            </el-form-item>
+
+            <el-form-item label="性别" prop="updateData.sex">
+                <el-select v-model="updateData.sex" placeholder="性别">
+                    <el-option label="男" value="男"></el-option>
+                    <el-option label="女" value="女"></el-option>
+                </el-select>
+            </el-form-item>
+
+            <el-form-item label="班级" prop="updateData.classCode">
+                <el-select v-model="updateData.classCode" placeholder="班级">
+                    <!--value与v-model绑定的值类型不同会导致回显时找不到对应的value值，直接在输入框展示v-model绑定的值-->
+                    <el-option v-for="classroom in classrooms" :value="String(classroom.cid)" :key="classroom.cid"
+                               :label="classroom.name"></el-option>
+                </el-select>
+            </el-form-item>
+
+            <el-form-item>
+                <el-button type="primary" @click="updateStudentSubmit(editForm)">提交</el-button>
+                <el-button @click="dialogEditVisible=false">取消</el-button>
+            </el-form-item>
+        </el-form>
+    </el-dialog>
+
+    <!--表格-->
+    <template>
+        <el-table
+                :data="tableData"
+                style="width: 100%"
+                :row-class-name="tableRowClassName"
+                @selection-change="handleSelectionChange">
+            <el-table-column
+                    type="selection"
+                    width="55">
+            </el-table-column>
+            <el-table-column
+                    type="index"
+                    width="50">
+            </el-table-column>
+            <el-table-column
+                    prop="sid"
+                    label="学号"
+                    sortable
+                    align="center">
+            </el-table-column>
+            <el-table-column
+                    prop="name"
+                    label="姓名"
+                    sortable
+                    align="center">
+            </el-table-column>
+            <el-table-column
+                    prop="sex"
+                    label="性别"
+                    align="center">
+            </el-table-column>
+            <el-table-column
+                    prop="className"
+                    label="班级"
+                    sortable
+                    align="center">
+            </el-table-column>
+            <el-table-column
+                    align="center"
+                    label="操作">
+                <template slot-scope="scope">
+                    <el-row>
+                        <el-button type="primary" @click="updateStudent(scope.row)" size="mini">修改</el-button>
+                        <el-button type="danger" @click="deleteById(scope.row)" size="mini">删除</el-button>
+                    </el-row>
+                </template>
+
+            </el-table-column>
+
+        </el-table>
+    </template>
+
+    <!--分页工具条-->
+    <el-pagination
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="currentPage"
+            :page-sizes="[5, 10, 15, 20]"
+            :page-size="pageSize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="totalCount">
+    </el-pagination>
+
+</div>
+
+</body>
+
+<script src=..\js\vue.js></script>
+<script src="..\element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="..\element-ui/lib/theme-chalk/index.css">
+<script src="..\js\axios-0.18.0.js"></script>
+
+<script>
+    new Vue({
+        el: "#app",
+
+        created() {
+            this.selectByPage();
+            this.getClassrooms();
+        },
+
+
+        data: {
+            // 当前页码
+            currentPage: 1,
+            //当前页数据
+            pageSize: 5,
+            //查询总数居
+            totalCount: 100,
+            // 添加数据对话框是否展示的标记
+            dialogVisible: false,
+            //边际对话框是否展示的标记
+            dialogEditVisible: false,
+            // 复选框选中数据集合
+            multipleSelection: [],
+            //被选中的id集合
+            selectedIds: [],
+            // 表格数据
+            tableData: [],
+            //修改表单数据
+            updateData: {
+                sid: '',
+                name: '',
+                sex: '',
+                classCode: ''
+            },
+            //下拉选择框班级回显数据
+            classrooms: [],
+            //搜索表单数据
+            queryData: {
+                sid: '',
+                name: '',
+                sex: '',
+                className: ''
+            },
+            //表单验证规则/^\d+$|^\d+[.]?\d+$/
+            rule: {
+                sid: [
+                    {required: true, message: '请输入学号', trigger: 'blur'},
+                    {
+                        required: true,
+                        pattern: /^\d+$|^\d+[.]?\d+$/,
+                        message: '学号仅支持数字',
+                        trigger: 'blur'
+                    },
+                    {max: 20, message: '长度不超过11位数字', trigger: 'blur'},
+                ],
+                name: [
+                    {required: true, message: '请输入姓名', trigger: 'blur'},
+                    {max: 20, message: '长度不超过20个字符', trigger: 'blur'}
+                ],
+                sex: [
+                    {required: true, message: '请选择性别', trigger: 'blur'}
+                ],
+                classCode:[
+                    {required: true, message: '请选择班级', trigger: 'blur'}
+                ]
+            }
+
+        },
+
+        methods: {
+            //分页查询
+            selectByPage() {
+                axios.post("/students/get?currentPage=" + this.currentPage + "&pageSize=" + this.pageSize, this.queryData).then((resp) => {
+                    this.tableData = resp.data.data.rows;
+                    this.totalCount = resp.data.data.totalCount;
+                })
+            },
+
+            //条件查询
+            queryOnSubmit() {
+                axios.post("/students/get?currentPage=" + this.currentPage + "&pageSize=" + this.pageSize, this.queryData).then((resp) => {
+                    this.tableData = resp.data.data.rows;
+                    this.totalCount = resp.data.data.totalCount;
+                })
+            },
+
+            //批量删除
+            deleteByIds() {
+                this.$confirm("此操作永久删除当前数据，是否继续？", "提示", {
+                    type: 'info'
+                }).then(() => {
+                    //取出被选中集合中数据的对应sid
+                    for (let i = 0; i < this.multipleSelection.length; i++) {
+                        var selectionElement = this.multipleSelection[i];
+                        this.selectedIds[i] = selectionElement.sid;
+                    }
+
+                    axios.post("/students/delete", this.selectedIds).then((res) => {
+                        if (res.data.code == 20021) {
+                            this.$message.success("删除成功");
+                        } else {
+                            this.$message.error("删除失败");
+                        }
+                    }).finally(() => {
+                        this.selectByPage();
+                    });
+                }).catch(() => {
+                    this.$message.info("取消删除");
+                });
+            },
+            //获取班级回显数据
+            getClassrooms() {
+                axios.get("/classrooms/getAll").then((resp) => {
+                    this.classrooms = resp.data.data;
+                });
+
+            },
+
+            //根据id删除
+            deleteById(row) {
+                this.$confirm("此操作将永久删除数据，是否继续？", "提示", {
+                    type: 'info'
+                }).then(() => {
+                    axios.get("/students/delete/" + row.sid).then((res) => {
+                        if (res.data.code == 20021) {
+                            this.$message.success("删除成功");
+                        } else {
+                            this.$message.error("删除失败");
+                        }
+                    }).finally(() => {
+                        this.selectByPage();
+                    });
+                }).catch(() => {
+                    this.$message.info("取消删除");
+                });
+            },
+
+
+            //弹出添加窗口
+            addStudent() {
+                // 重置表单
+                this.updateData = {};
+                this.dialogVisible = true;
+            },
+
+
+            //添加成绩提交
+            addStudentSubmit(addForm) {
+                this.$refs.addForm.validate((valid) => {
+                    if (valid) {
+                        axios.post("/students/insert", this.updateData).then((res) => {
+                            if (res.data.code == 20011) {
+                                this.dialogVisible = false;
+                                this.$message.success("添加成功");
+                            } else {
+                                this.$message.error(res.data.msg);
+                            }
+                        }).finally(() => {
+                            this.selectByPage();
+                        });
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+
+            //点击修改按钮后回显表单数据
+            updateStudent(row) {
+                axios.get("/students/get/" + row.sid).then((res) => {
+                    this.updateData = res.data.data;
+                    this.dialogEditVisible = true;
+                })
+            },
+
+            //修改成绩提交
+            updateStudentSubmit(editForm) {
+                this.$refs.editForm.validate((valid) => {
+                    if (valid) {
+                        axios.post("/students/update", this.updateData).then((res) => {
+                            if (res.data.code == 20031) {
+                                this.dialogEditVisible = false;
+                                this.$message.success("修改成功");
+                            } else {
+                                this.$message.error("修改失败");
+                            }
+                        }).finally(() => {
+                            this.updateData={};
+                            this.selectByPage();
+                        });
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+
+            tableRowClassName({row, rowIndex}) {
+                if ((rowIndex + 3) % 4 === 0) {
+                    return 'warning-row';
+                } else if ((rowIndex + 1) % 4 === 0) {
+                    return 'success-row';
+                }
+                return '';
+            },
+
+            // 复选框选中后执行的方法
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
+
+            //分页
+            handleSizeChange(val) {
+                this.pageSize = val;
+                this.selectByPage();
+            },
+
+            handleCurrentChange(val) {
+                this.currentPage = val;
+                this.selectByPage();
+            }
+
+
+        }
+    })
+</script>
+
+</html>

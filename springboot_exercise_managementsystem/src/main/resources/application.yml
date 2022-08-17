@@ -1,0 +1,22 @@
+#配置信息
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/student_management
+    username: root
+    password: rui_tan97@163.com
+  main:
+    banner-mode: off
+
+server:
+  port: 80
+
+#开启mybatis-plus日志输出到控制台
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    global-config:
+      banner: false
+

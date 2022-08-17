@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.management.mapper.ScoreMapper">
+
+    <resultMap id="BaseResultMap" type="com.management.domain.Score">
+        <id property="id" column="id" jdbcType="INTEGER"/>
+        <result property="sid" column="sid" jdbcType="INTEGER"/>
+        <result property="subid" column="subid" jdbcType="INTEGER"/>
+        <result property="eid" column="eid" jdbcType="INTEGER"/>
+        <result property="score" column="score" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <!--分页条件查询-->
+    <select id="selectByPageAndCondition" resultType="com.management.Vo.ScoreVo">
+        select score.id,score.sid,s.name,c.name as className,sub.name as subject,e.name as exam,score.score
+        from student_management.student s,subject sub,exam e,classroom c,score
+        <where>
+            score.sid=s.sid and c.cid = s.class_code and sub.subid = score.subid and e.eid=score.eid
+            <if test="scoreCondition.name != null and scoreCondition.name != ''">
+                and s.name like concat("%",#{scoreCondition.name},"%")
+            </if>
+            <if test="scoreCondition.className != null and scoreCondition.className != ''">
+                and c.name like concat("%",#{scoreCondition.className},"%")
+            </if>
+            <if test="scoreCondition.subject != null and scoreCondition.subject != ''">
+                and sub.name like concat("%",#{scoreCondition.subject},"%")
+            </if>
+            <if test="scoreCondition.exam != null and scoreCondition.exam != ''">
+                and e.name like concat("%",#{scoreCondition.exam},"%")
+            </if>
+        </where>
+        order by score.sid
+        limit #{start},#{size};
+    </select>
+
+    <!--条件查询总条目数-->
+    <select id="getTotalCountByCondition" resultType="java.lang.Integer">
+        select count(*)
+        from student_management.student s,subject sub,exam e,classroom c,score
+        <where>
+            score.sid=s.sid and c.cid = s.class_code and sub.subid = score.subid and e.eid=score.eid
+            <if test="scoreCondition.name != null and scoreCondition.name != ''">
+                and s.name like concat("%",#{scoreCondition.name},"%")
+            </if>
+            <if test="scoreCondition.className != null and scoreCondition.className != ''">
+                and c.name like concat("%",#{scoreCondition.className},"%")
+            </if>
+            <if test="scoreCondition.subject != null and scoreCondition.subject != ''">
+                and sub.name like concat("%",#{scoreCondition.subject},"%")
+            </if>
+            <if test="scoreCondition.exam != null and scoreCondition.exam != ''">
+                and e.name like concat("%",#{scoreCondition.exam},"%")
+            </if>
+        </where>
+    </select>
+
+    <!--批量删除-->
+    <delete id="deleteByIds">
+        delete from score where id in
+        <foreach collection="ids" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!--条件统计查询平均值-->
+    <select id="getAvgByCondition" resultType="com.management.Vo.StatisticsVo">
+        select *
+        from (
+                 select c.name as className,e.name as exam,sub.name as subject,AVG(score) as score
+                 from student_management.student s,subject sub,exam e,classroom c,score
+                 where score.sid=s.sid and c.cid = s.class_code and sub.subid = score.subid and e.eid=score.eid
+                 GROUP BY e.eid,sub.subid,c.cid
+                 ) as result
+        <where>
+            <if test="condition.className != null and condition.className != ''">
+                and className = #{condition.className}
+            </if>
+            <if test="condition.subject != null and condition.subject != ''">
+                and result.subject = #{condition.subject}
+            </if>
+            <if test="condition.exam != null and condition.exam != ''">
+                and exam = #{condition.exam}
+            </if>
+        </where>
+    </select>
+
+    <!--条件统计查询最大值-->
+    <select id="getMaxByCondition" resultType="com.management.Vo.StatisticsVo">
+        select *
+        from (
+        select c.name as className,e.name as exam,sub.name as subject,MAX(score) as score
+        from student_management.student s,subject sub,exam e,classroom c,score
+        where score.sid=s.sid and c.cid = s.class_code and sub.subid = score.subid and e.eid=score.eid
+        GROUP BY e.eid,sub.subid,c.cid
+        ) as result
+        <where>
+            <if test="condition.className != null and condition.className != ''">
+                and className = #{condition.className}
+            </if>
+            <if test="condition.subject != null and condition.subject != ''">
+                and result.subject = #{condition.subject}
+            </if>
+            <if test="condition.exam != null and condition.exam != ''">
+                and exam = #{condition.exam}
+            </if>
+        </where>
+
+    </select>
+
+    <!--条件统计查询最小值-->
+    <select id="getMinByCondition" resultType="com.management.Vo.StatisticsVo">
+        select *
+        from (
+        select c.name as className,e.name as exam,sub.name as subject,MIN(score) as score
+        from student_management.student s,subject sub,exam e,classroom c,score
+        where score.sid=s.sid and c.cid = s.class_code and sub.subid = score.subid and e.eid=score.eid
+        GROUP BY e.eid,sub.subid,c.cid
+        ) as result
+        <where>
+            <if test="condition.className != null and condition.className != ''">
+                and className = #{condition.className}
+            </if>
+            <if test="condition.subject != null and condition.subject != ''">
+                and result.subject = #{condition.subject}
+            </if>
+            <if test="condition.exam != null and condition.exam != ''">
+                and exam = #{condition.exam}
+            </if>
+        </where>
+    </select>
+
+
+</mapper>
