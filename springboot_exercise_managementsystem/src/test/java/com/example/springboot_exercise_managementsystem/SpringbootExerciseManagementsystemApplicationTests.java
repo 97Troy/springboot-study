@@ -2,21 +2,12 @@ package com.example.springboot_exercise_managementsystem;
 
 import com.management.SpringbootExerciseManagementsystemApplication;
 import com.management.Vo.PageBeanVo;
-import com.management.Vo.ScoreVo;
-import com.management.Vo.StatisticsVo;
-import com.management.Vo.StudentVo;
 import com.management.domain.Classroom;
-import com.management.domain.Score;
-import com.management.domain.Student;
 import com.management.domain.Subject;
+import com.management.domain.User;
 import com.management.domain.query.ScoreQuery;
-import com.management.domain.query.StatisticsQuery;
-import com.management.domain.query.StudentQuery;
 import com.management.domain.query.SubjectQuery;
-import com.management.mapper.ClassroomMapper;
-import com.management.mapper.ScoreMapper;
-import com.management.mapper.StudentMapper;
-import com.management.mapper.SubjectMapper;
+import com.management.mapper.*;
 import com.management.service.ScoreService;
 import com.management.service.SubjectService;
 import org.junit.jupiter.api.Test;
@@ -40,6 +31,9 @@ class SpringbootExerciseManagementsystemApplicationTests {
     private ClassroomMapper classroomMapper;
     @Autowired
     private SubjectMapper subjectMapper;
+    @Autowired
+    private UserMapper userMapper;
+
 
     @Test
     public void testSelectByPage() {
@@ -138,5 +132,17 @@ class SpringbootExerciseManagementsystemApplicationTests {
         scoreQuery.setSubject("数学");
         scoreMapper.selectByPageAndCondition(0,5,scoreQuery);
     }
+
+    @Test
+    public void testUser(){
+        User user = new User();
+        //user.setUsername("fengli");
+        user.setUsername("2022081001");
+        user.setPassword("2022081001");
+        User login = userMapper.login(user);
+        System.out.println(login);
+
+    }
+
 
 }

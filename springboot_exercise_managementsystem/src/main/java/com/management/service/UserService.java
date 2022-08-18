@@ -11,5 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 */
 @Transactional
 public interface UserService extends IService<User> {
-
+    /**
+     * 用户登录（用户名或uid）
+     * @param user
+     * @return
+     */
+    User login(User user);
 }

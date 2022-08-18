@@ -5,11 +5,17 @@
 <mapper namespace="com.management.mapper.UserMapper">
 
     <resultMap id="BaseResultMap" type="com.management.domain.User">
-            <id property="uid" column="uid" jdbcType="INTEGER"/>
-            <result property="username" column="username" jdbcType="VARCHAR"/>
-            <result property="password" column="password" jdbcType="VARCHAR"/>
-            <result property="identity" column="identity" jdbcType="INTEGER"/>
+        <id property="uid" column="uid" jdbcType="INTEGER"/>
+        <result property="username" column="username" jdbcType="VARCHAR"/>
+        <result property="password" column="password" jdbcType="VARCHAR"/>
+        <result property="identity" column="identity" jdbcType="INTEGER"/>
     </resultMap>
+    <select id="login" resultType="com.management.domain.User">
+        select *
+        from user
+        where (username = #{username} or uid = #{username})
+          and password = #{password}
+    </select>
 
 
 </mapper>

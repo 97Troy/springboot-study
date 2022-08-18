@@ -10,32 +10,61 @@
     <div class="zi">
         <p>学生成绩管理系统</p>
     </div>
+
 </div>
 
-<div class="big-content">
-    <div class="menu">
-        <ul><p>信息管理</p>
-            <li><a href="studentManagement.html" target="dd">学生信息</a></li>
-            <li><a href="subjectManagement.html" target="dd">考试科目</a></li>
-            <li><a href="examManagement.html" target="dd">考试场次</a></li>
-        </ul>
 
-        <ul><p>成绩查询</p>
-            <li><a href="studentScore.html" target="dd">学生成绩</a></li>
-            <li><a href="statisticsQuery.html" target="dd">统计查询</a></li>
-        </ul>
+<div id="app">
+    <div class="big-content">
+        <div class="menu">
+            <ul><p>信息管理</p>
+                <li><a href="studentManagement.html" target="dd">学生信息</a></li>
+                <li><a href="subjectManagement.html" target="dd">考试科目</a></li>
+                <li><a href="examManagement.html" target="dd">考试场次</a></li>
+            </ul>
 
-        <ul><p>账号安全</p>
-            <li><a href="userInformation.html" target="dd">账户信息</a></li>
-        </ul>
-    </div>
+            <ul><p>成绩查询</p>
+                <li><a href="studentScore.html" target="dd">学生成绩</a></li>
+                <li><a href="statisticsQuery.html" target="dd">统计查询</a></li>
+            </ul>
+
+            <ul><p>账号安全</p>
+                <li><a href="userInformation.html" target="dd">账户信息</a></li>
+            </ul>
+
+            <el-row>
+                <el-button type="primary" @click="logout">退出</el-button>
+            </el-row>
+        </div>
 
 
-    <div class="content">
-        <iframe src="userInformation.html" class="content-1" name="dd" frameborder="0" ></iframe>
+        <div class="content">
+            <iframe src="userInformation.html" class="content-1" name="dd" frameborder="0"></iframe>
 
+        </div>
     </div>
 </div>
 
 </body>
+
+<script src=..\js\vue.js></script>
+<script src="..\element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="..\element-ui/lib/theme-chalk/index.css">
+<script src="..\js\axios-0.18.0.js"></script>
+
+<script>
+    new Vue({
+        el:"#app",
+        methods:{
+            logout(){
+                axios.get("/users/logout").then((resp)=>{
+                    if (resp.data.code==101){
+                        location.href="login.html";
+                    }
+                });
+            }
+        }
+    })
+</script>
+
 </html>

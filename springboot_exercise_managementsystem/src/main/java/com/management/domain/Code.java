@@ -6,11 +6,15 @@ public class Code {
     public static final Integer DELETE_OK=20021;//删除
     public static final Integer UPDATE_OK=20031;//修改
     public static final Integer GET_OK=20041;//查询
+    public static final Integer REGISTER_OK=20071;//注册
+    public static final Integer LOGIN_OK=20081;//登录
 
     public static final Integer SAVE_ERR=20010;
     public static final Integer DELETE_ERR=20020;
     public static final Integer UPDATE_ERR=20030;
     public static final Integer GET_ERR=20040;
+    public static final Integer REGISTER_ERR=20070;//注册
+    public static final Integer LOGIN_ERR=20080;//登录
 
     // 异常状态码
     public static final Integer SYSTEM_ERR=50001;

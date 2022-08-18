@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>学生成绩管理系统-登录页面</title>
+
+</head>
+<body>
+
+<div id="app">
+    <template>
+        <div id="login">
+            <div id="admin">
+                <div class="pos" >
+                    <h1 class="adminh1">用户登录</h1>
+                    <el-form
+                            :model="loginData"
+                            status-icon
+                            ref="ruleForm"
+                            label-width="100px"
+                            class="demo-ruleForm"
+                    >
+                        <el-form-item label="用户名：" prop="username">
+                            <el-input
+                                    prefix-icon="el-icon-user"
+                                    style="width: 250px"
+                                    type="text"
+                                    v-model="loginData.username"
+                                    autocomplete="off"
+                            ></el-input>
+                        </el-form-item>
+                        <el-form-item label="密 码：" prop="password">
+                            <el-input
+                                    prefix-icon="el-icon-menu"
+                                    style="width: 250px"
+                                    show-password
+                                    type="password"
+                                    v-model="loginData.password"
+                                    autocomplete="off"
+                            ></el-input>
+                        </el-form-item>
+                        <el-form-item>
+                            <el-button type="primary" @click="loginOnSubmit">登录</el-button>
+                            <el-button type="primary" @click="register">注册</el-button>
+                        </el-form-item>
+                        <el-form-item>
+
+                        </el-form-item>
+                    </el-form>
+                </div>
+            </div>
+        </div>
+    </template>
+</div>
+
+</body>
+
+<script src=..\js\vue.js></script>
+<script src="..\element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="..\element-ui/lib/theme-chalk/index.css">
+<script src="..\js\axios-0.18.0.js"></script>
+<link rel="stylesheet" href="..\css\login.css" type="text/css">
+
+
+<script>
+    new Vue({
+        el: "#app",
+
+        data: {
+            loginData: {},
+        },
+
+
+        methods: {
+            loginOnSubmit(){
+                axios.post("/users/login",this.loginData).then((resp)=>{
+                    if(resp.data.code==20081){
+                        this.$message.success("登录成功！");
+                        if (resp.data.data == 1){
+                            location.href="teacherHome.html";
+                        }
+                    }else {
+                        this.$message.error("登录失败！");
+                    }
+                })
+            },
+            register(){
+                location.href="register.html";
+            },
+        },
+
+    })
+</script>
+</html>
+

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>学生成绩管理系统-注册页面</title>
+
+</head>
+<body>
+
+<div id="app">
+    <template>
+        <div id="login">
+            <div id="admin">
+                <div class="pos" >
+                    <h1 class="adminh1">用户注册</h1>
+                    <el-form
+                            :model="registerData"
+                            status-icon
+                            ref="ruleForm"
+                            label-width="100px"
+                            class="demo-ruleForm"
+                    >
+                        <el-form-item label="用户名：" prop="username">
+                            <el-input
+                                    prefix-icon="el-icon-user"
+                                    style="width: 250px"
+                                    type="text"
+                                    v-model="registerData.username"
+                                    autocomplete="off"
+                            ></el-input>
+                        </el-form-item>
+                        <el-form-item label="密 码：" prop="password">
+                            <el-input
+                                    prefix-icon="el-icon-menu"
+                                    style="width: 250px"
+                                    show-password
+                                    type="password"
+                                    v-model="registerData.password"
+                                    autocomplete="off"
+                            ></el-input>
+                        </el-form-item>
+                        <el-form-item label="学号/工号：" prop="uid">
+                            <el-input
+                                    prefix-icon="el-icon-menu"
+                                    style="width: 250px"
+                                    type="text"
+                                    v-model="registerData.uid"
+                            ></el-input>
+                        </el-form-item>
+                        <el-form-item prop="identity" >
+                            <el-radio v-model="registerData.identity" label="2">学生</el-radio>
+                            <el-radio v-model="registerData.identity" label="1">老师</el-radio>
+                        </el-form-item>
+                        <el-form-item>
+                            <el-button type="primary" @click="registerOnSubmit">确认注册</el-button>
+                            <el-button type="primary" @click="loginOnSubmit">返回登录</el-button>
+                        </el-form-item>
+                        <el-form-item>
+
+                        </el-form-item>
+                    </el-form>
+                </div>
+            </div>
+        </div>
+    </template>
+</div>
+
+</body>
+
+<script src=..\js\vue.js></script>
+<script src="..\element-ui/lib/index.js"></script>
+<link rel="stylesheet" href="..\element-ui/lib/theme-chalk/index.css">
+<script src="..\js\axios-0.18.0.js"></script>
+<link rel="stylesheet" href="..\css\login.css" type="text/css">
+
+
+<script>
+    new Vue({
+        el: "#app",
+
+        data: {
+            registerData: {
+                identity: '2',
+            },
+        },
+
+
+        methods: {
+            loginOnSubmit(){
+                location.href="login.html";
+            },
+            registerOnSubmit(){
+                axios.post("/users/register",this.registerData).then((resp)=>{
+                   if (resp.data.code==20071){
+                       this.$message.success("注册成功！");
+                       this.registerData={identity:'2'};
+                   } else {
+                       this.$message.error(resp.data.msg);
+                       this.registerData={identity:'2'};
+                   }
+                });
+            },
+        },
+
+    })
+</script>
+</html>
+
